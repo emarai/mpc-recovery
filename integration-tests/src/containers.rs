@@ -626,7 +626,7 @@ impl LeaderNodeApi {
 
     pub async fn new_account(
         &self,
-        request: NewAccountRequest,
+        request: impl serde::Serialize,
     ) -> anyhow::Result<(StatusCode, NewAccountResponse)> {
         util::post(format!("{}/new_account", self.address), request).await
     }

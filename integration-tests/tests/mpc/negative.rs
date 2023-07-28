@@ -3,6 +3,9 @@ use crate::{account, check, key, token, with_nodes, MpcCheck};
 
 use ed25519_dalek::{PublicKey as PublicKeyEd25519, Signature, Verifier};
 use hyper::StatusCode;
+use mpc_recovery::msg::NewAccountRequest;
+use mpc_recovery::transaction::CreateAccountOptions;
+use mpc_recovery::utils::user_credentials_request_digest;
 use mpc_recovery::{
     msg::{ClaimOidcRequest, MpcPkRequest, NewAccountResponse, UserCredentialsResponse},
     utils::{claim_oidc_request_digest, claim_oidc_response_digest, oidc_digest, sign_digest},
@@ -522,91 +525,44 @@ async fn test_malformed_account_id() -> anyhow::Result<()> {
     .await
 }
 
-// TODO: uncomment once we can malformed payloads again
+#[tokio::test]
+async fn test_malformed_create_account() -> anyhow::Result<()> {
+    let user_oidc = token::valid_random();
+    let (user_sk, user_pk) = key::random();
+    let digest = user_credentials_request_digest(&user_oidc, &user_pk)?;
+    let near_crypto::Signature::ED25519(frp_signature) = user_sk.sign(&digest) else {
+        anyhow::bail!("Wrong signature type");
+    };
+    let key = key::malformed_pk();
 
-// #[tokio::test]
-// async fn test_malformed_public_key() -> anyhow::Result<()> {
-//     with_nodes(1, |ctx| {
-//         Box::pin(async move {
-//             let account_id = account::random(ctx.worker)?;
-//             let malformed_public_key = key::malformed();
-//             let oidc_token = token::valid_random();
-//             let user_public_key = key::random();
+    let req = serde_json::json!({
+        "near_account_id": "groot",
+        "create_account_options": {
+            "full_access_keys": Some(vec![&key]),
+            "limited_access_keys": serde_json::Value::Null,
+            "contract_bytes": serde_json::Value::Null,
+        },
+        "user_credentials_frp_signature": frp_signature,
+        "oidc_token": user_oidc,
+        "frp_public_key": key,
+    });
 
-//             let create_account_options = CreateAccountOptions {
-//                 full_access_keys: Some(vec![user_public_key.clone().parse().unwrap()]),
-//                 limited_access_keys: None,
-//                 contract_bytes: None,
-//             };
+    with_nodes(1, |ctx| {
+        Box::pin(async move {
+            ctx.leader_node
+                .claim_oidc_with_helper(&user_oidc, &user_pk, &user_sk)
+                .await?;
 
-//             // Check that the service is still available
-//             let (status_code, new_acc_response) = ctx
-//                 .leader_node
-//                 .new_account(NewAccountRequest {
-//                     near_account_id: account_id.to_string(),
-//                     create_account_options,
-//                     oidc_token: oidc_token.clone(),
-//                 })
-//                 .await?;
-//             assert_eq!(status_code, StatusCode::OK);
-//             assert!(matches!(new_acc_response, NewAccountResponse::Ok {
-//                     create_account_options: _,
-//                     user_recovery_public_key: _,
-//                     near_account_id: acc_id,
-//                 } if acc_id == account_id.to_string()
-//             ));
+            let result = ctx.leader_node.new_account(&req).await;
 
-//             tokio::time::sleep(Duration::from_millis(2000)).await;
+            println!("{:#?}", result);
+            // .assert_bad_request()?;
 
-//             check::access_key_exists(&ctx, &account_id, &user_public_key).await?;
-
-//             let (status_code, add_key_response) = ctx
-//                 .leader_node
-//                 .add_key(AddKeyRequest {
-//                     near_account_id: Some(account_id.to_string()),
-//                     oidc_token: oidc_token.clone(),
-//                     public_key: malformed_public_key.clone(),
-//                 })
-//                 .await?;
-//             assert_eq!(status_code, StatusCode::BAD_REQUEST);
-//             assert!(matches!(add_key_response, AddKeyResponse::Err { .. }));
-
-//             // Check that the service is still available
-//             let new_user_public_key = key::random();
-
-//             let (status_code, add_key_response) = ctx
-//                 .leader_node
-//                 .add_key(AddKeyRequest {
-//                     near_account_id: Some(account_id.to_string()),
-//                     oidc_token,
-//                     create_account_options: CreateAccountOptions {
-//                         full_access_keys: Some(vec![new_user_public_key.parse()?]),
-//                         limited_access_keys: None,
-//                         contract_bytes: None,
-//                     },
-//                 })
-//                 .await?;
-
-//             assert_eq!(status_code, StatusCode::OK);
-
-//             let AddKeyResponse::Ok {
-//                 full_access_keys,
-//                 limited_access_keys,
-//                 near_account_id,
-//             } = add_key_response;
-//             assert_eq!(full_access_keys, vec![new_user_public_key]);
-//             assert_eq!(limited_access_keys, Vec::<String>::new());
-//             assert_eq!(near_account_id, account_id.to_string());
-
-//             tokio::time::sleep(Duration::from_millis(2000)).await;
-
-//             check::access_key_exists(&ctx, &account_id, &new_user_public_key).await?;
-
-//             Ok(())
-//         })
-//     })
-//     .await
-// }
+            Ok(())
+        })
+    })
+    .await
+}
 
 #[test(tokio::test)]
 async fn test_reject_new_pk_set() -> anyhow::Result<()> {
