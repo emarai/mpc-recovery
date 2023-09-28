@@ -8,3 +8,8 @@ Dockerfile
 .dockerignore
 infra/
 integration-tests/
+
+# Allowed files and folders
+
+## Needed for sped up local builds:
+!/target/x86_64-unknown-linux-gnu/release/mpc-recovery

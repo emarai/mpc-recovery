@@ -10,13 +10,19 @@ docker pull ghcr.io/near/sandbox
 ```
 In case of authorization issues make sure you have logged into docker using your [access token](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-with-a-personal-access-token-classic).
 
-Now, build mpc-recovery from the project's root:
+Now, build mpc-recovery from the project's root with:
+
+```sh
+./build/local.sh
+```
+
+or with:
 
 ```BASH
 docker build . -t near/mpc-recovery
 ```
 
-**Note**. You will need to re-build the Docker image each time you make a code change and want to run the integration tests.
+**Note**. Re-building the Docker image is necessary each time you make a code change and want to run the integration tests. Both the commands will build a docker image, but the former will utilize Rust's incremental compilation to reduce build times, but YMMV depending on what platform you are building from.
 
 Finally, run the integration tests:
 

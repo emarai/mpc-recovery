@@ -1,0 +1,7 @@
+FROM debian:bookworm-slim as runtime
+COPY ./target/x86_64-unknown-linux-gnu/release/mpc-recovery /usr/local/bin/mpc-recovery
+RUN apt-get update && apt-get install --assume-yes libssl-dev ca-certificates curl
+RUN update-ca-certificates
+WORKDIR /usr/local/bin
+
+ENTRYPOINT [ "mpc-recovery" ]
