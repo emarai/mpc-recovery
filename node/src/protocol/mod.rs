@@ -7,6 +7,7 @@ mod triple;
 pub mod message;
 pub mod state;
 
+pub use consensus::ConsensusError;
 pub use contract::{ParticipantInfo, ProtocolState};
 pub use message::MpcMessage;
 pub use state::NodeState;

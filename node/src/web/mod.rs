@@ -1,6 +1,6 @@
 mod error;
 
-use self::error::MpcSignError;
+use self::error::Error;
 use crate::protocol::message::SignedMessage;
 use crate::protocol::{MpcMessage, NodeState};
 use axum::http::StatusCode;
@@ -77,7 +77,7 @@ pub struct MsgRequest {
 #[tracing::instrument(level = "debug", skip_all)]
 async fn msg(
     Extension(state): Extension<Arc<AxumState>>,
-    WithRejection(Json(encrypted), _): WithRejection<Json<Ciphered>, MpcSignError>,
+    WithRejection(Json(encrypted), _): WithRejection<Json<Ciphered>, Error>,
 ) -> StatusCode {
     tracing::debug!(ciphertext = ?encrypted.text, "received encrypted");
     let message =
@@ -101,7 +101,7 @@ async fn msg(
 #[tracing::instrument(level = "debug", skip_all)]
 async fn join(
     Extension(state): Extension<Arc<AxumState>>,
-    WithRejection(Json(participant), _): WithRejection<Json<Participant>, MpcSignError>,
+    WithRejection(Json(participant), _): WithRejection<Json<Participant>, Error>,
 ) -> StatusCode {
     let protocol_state = state.protocol_state.read().await;
     match &*protocol_state {
