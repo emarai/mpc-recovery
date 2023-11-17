@@ -1,7 +1,7 @@
 use axum::extract::rejection::JsonRejection;
 use reqwest::StatusCode;
 
-use crate::protocol::ConsensusError;
+use crate::protocol::{ConsensusError, CryptographicError, MpcMessage};
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -9,12 +9,18 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 /// crate. It is used to unify all errors that can happen in the application.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    // The `#[from]` attribute generates `From<JsonRejection> for MpcError`
-    // implementation. See `thiserror` docs for more information
     #[error(transparent)]
     JsonExtractorRejection(#[from] JsonRejection),
     #[error(transparent)]
     Protocol(#[from] ConsensusError),
+    #[error(transparent)]
+    Cryptography(#[from] CryptographicError),
+    #[error(transparent)]
+    Message(#[from] tokio::sync::mpsc::error::SendError<MpcMessage>),
+    #[error(transparent)]
+    Rpc(#[from] near_fetch::Error),
+    #[error("node is not running")]
+    NotRunning,
 }
 
 // We implement `IntoResponse` so MpcSignError can be used as a response
@@ -25,6 +31,10 @@ impl axum::response::IntoResponse for Error {
                 (json_rejection.status(), json_rejection.body_text())
             }
             Error::Protocol(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
+            Error::Cryptography(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
+            Error::Message(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
+            Error::Rpc(err) => (StatusCode::BAD_REQUEST, err.to_string()),
+            err @ Error::NotRunning => (StatusCode::BAD_REQUEST, err.to_string()),
         };
 
         (status, axum::Json(message)).into_response()
