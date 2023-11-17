@@ -14,7 +14,7 @@ pub enum SendError {
     #[error("serialization unsuccessful: {0}")]
     DataConversionError(serde_json::Error),
     #[error("http client error: {0}")]
-    ReqwestClientError(reqwest::Error),
+    ReqwestClientError(#[from] reqwest::Error),
     #[error("http response could not be parsed: {0}")]
     ReqwestBodyError(reqwest::Error),
     #[error("http response body is not valid utf-8: {0}")]
@@ -35,7 +35,7 @@ pub async fn send_encrypted<U: IntoUrl>(
         .map_err(|err| SendError::EncryptionError(err.to_string()))?;
     tracing::debug!(?participant, ciphertext = ?encrypted.text, "sending encrypted");
 
-    let mut url = url.into_url().unwrap();
+    let mut url = url.into_url()?;
     url.set_path("msg");
     let action = || async {
         let response = client
@@ -74,7 +74,7 @@ pub async fn join<U: IntoUrl>(
     url: U,
     participant: &Participant,
 ) -> Result<(), SendError> {
-    let mut url = url.into_url().unwrap();
+    let mut url = url.into_url()?;
     url.set_path("join");
     let action = || async {
         let response = client
