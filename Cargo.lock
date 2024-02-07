@@ -3123,6 +3123,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "hex-literal"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
+
+[[package]]
 name = "highway"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4094,7 +4100,7 @@ dependencies = [
  "near-crypto 0.17.0",
  "near-o11y 0.17.0",
  "near-primitives 0.17.0",
- "num-rational",
+ "num-rational 0.3.2",
  "once_cell",
  "serde",
  "serde_json",
@@ -4387,7 +4393,7 @@ dependencies = [
  "enum-map",
  "near-account-id 1.0.0",
  "near-primitives-core 0.20.0",
- "num-rational",
+ "num-rational 0.3.2",
  "serde",
  "serde_repr",
  "serde_yaml",
@@ -4416,7 +4422,7 @@ dependencies = [
  "near-rpc-error-macro 0.17.0",
  "near-stdx 0.17.0",
  "near-vm-errors",
- "num-rational",
+ "num-rational 0.3.2",
  "once_cell",
  "primitive-types",
  "rand 0.8.5",
@@ -4456,7 +4462,7 @@ dependencies = [
  "near-rpc-error-macro 0.20.0",
  "near-stdx 0.20.0",
  "near-vm-runner",
- "num-rational",
+ "num-rational 0.3.2",
  "once_cell",
  "primitive-types",
  "rand 0.8.5",
@@ -4487,7 +4493,7 @@ dependencies = [
  "derive_more",
  "enum-map",
  "near-account-id 0.17.0",
- "num-rational",
+ "num-rational 0.3.2",
  "serde",
  "serde_repr",
  "serde_with 3.4.0",
@@ -4509,7 +4515,7 @@ dependencies = [
  "derive_more",
  "enum-map",
  "near-account-id 1.0.0",
- "num-rational",
+ "num-rational 0.3.2",
  "serde",
  "serde_repr",
  "serde_with 3.4.0",
@@ -4680,7 +4686,7 @@ dependencies = [
  "near-parameters",
  "near-primitives-core 0.20.0",
  "near-stdx 0.20.0",
- "num-rational",
+ "num-rational 0.3.2",
  "once_cell",
  "prefix-sum-vec",
  "ripemd",
@@ -4806,6 +4812,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "num"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b05180d69e3da0e530ba2a1dae5110317e49e3b7f3d41be227dc5f92e49ee7af"
+dependencies = [
+ "num-bigint 0.4.4",
+ "num-complex",
+ "num-integer",
+ "num-iter",
+ "num-rational 0.4.1",
+ "num-traits",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4856,6 +4876,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-complex"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ba157ca0885411de85d6ca030ba7e2a83a28636056c7c699b07c8b6f7383214"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "num-format"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4897,6 +4926,18 @@ dependencies = [
  "num-integer",
  "num-traits",
  "serde",
+]
+
+[[package]]
+name = "num-rational"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0638a1c9d0a3c0914158145bc76cff373a75a627e6ecbfb71cbe6f453a5a19b0"
+dependencies = [
+ "autocfg 1.1.0",
+ "num-bigint 0.4.4",
+ "num-integer",
+ "num-traits",
 ]
 
 [[package]]
@@ -6112,6 +6153,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ripemd160"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad5112e0dbbb87577bfbc56c42450235e3012ce336e29c5befd7807bd626da4a"
+dependencies = [
+ "block-buffer 0.7.3",
+ "digest 0.8.1",
+ "opaque-debug 0.2.3",
+]
+
+[[package]]
 name = "rmp"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6160,6 +6212,15 @@ dependencies = [
  "signature 2.2.0",
  "subtle",
  "zeroize",
+]
+
+[[package]]
+name = "rust-base58"
+version = "0.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b313b91fcdc6719ad41fa2dad2b7e810b03833fae4bf911950e15529a5f04439"
+dependencies = [
+ "num",
 ]
 
 [[package]]
@@ -7209,6 +7270,21 @@ dependencies = [
  "serde_json",
  "sha2 0.10.8",
  "tokio",
+]
+
+[[package]]
+name = "testing-irfi"
+version = "0.1.0"
+dependencies = [
+ "digest 0.8.1",
+ "hex 0.4.3",
+ "hex-literal",
+ "k256",
+ "mpc-recovery-node",
+ "near-primitives 0.17.0",
+ "ripemd160",
+ "rust-base58",
+ "sha2 0.8.2",
 ]
 
 [[package]]
